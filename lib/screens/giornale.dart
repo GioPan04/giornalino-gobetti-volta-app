@@ -33,11 +33,13 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
     }
   }
 
+  bool dark;
+
   @override
   Widget build(BuildContext context) {
 
     final GiornaleScreenArgs args = ModalRoute.of(context).settings.arguments;
-
+    dark = (MediaQuery.of(context).platformBrightness == Brightness.dark);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFFF44336),
@@ -47,9 +49,20 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
         future: getData(args.url),
         builder: (context, snapshot) {
           if(snapshot.hasData) {
-            return MarkdownBody(
-              data: Utf8Decoder(allowMalformed: true).convert(snapshot.data.toString().codeUnits),
-              onTapLink: (url) => _launch(url),
+            return SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: MarkdownBody(
+                  data: Utf8Decoder(allowMalformed: true).convert(snapshot.data.toString().codeUnits),
+                  onTapLink: (url) => _launch(url),
+                  styleSheet: MarkdownStyleSheet(
+                    h1: TextStyle(fontFamily: "OpenSans-Bold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 25, height: 2),
+                    h2: TextStyle(fontFamily: "OpenSans-SemiBold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 19, height: 2),
+                    p: TextStyle(fontFamily: "OpenSans-Regular", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), height: 1.15)
+
+                  ),
+                ),
+              ),
             );
           } else if(snapshot.hasError) {
             return Center(

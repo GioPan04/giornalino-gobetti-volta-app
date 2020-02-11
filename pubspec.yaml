@@ -22,9 +22,7 @@ dependencies:
   shimmer: ^1.0.1
   http: ^0.12.0+4
   flutter_webview_plugin: ^0.3.10+1
-  flutter_markdown:
-    git:
-      url: https://github.com/GioPan04/flutter_markdown
+  flutter_markdown: ^0.3.3
   url_launcher: ^5.4.1
 
   # The following adds the Cupertino Icons font to your application.
@@ -46,6 +44,19 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  fonts:
+    - family: OpenSans-Regular
+      fonts:
+        - asset: fonts/OpenSans-Regular.ttf
+    - family: OpenSans-Bold
+      fonts:
+        - asset: fonts/OpenSans-Bold.ttf
+    - family: OpenSans-SemiBold
+      fonts:
+        - asset: fonts/OpenSans-SemiBold.ttf
+    - family: OpenSans-Light
+      fonts:
+        - asset: fonts/OpenSans-Light.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

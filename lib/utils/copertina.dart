@@ -6,11 +6,12 @@ class Copertina extends StatelessWidget {
   final String autore;
   final String imageUrl;
   final String date;
-
-  const Copertina({@required this.title, @required this.autore, @required this.imageUrl, @required this.date});
+  bool dark;
+  Copertina({@required this.title, @required this.autore, @required this.imageUrl, @required this.date});
 
   @override
   Widget build(BuildContext context) {
+    dark = (MediaQuery.of(context).platformBrightness == Brightness.dark);
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -24,17 +25,20 @@ class Copertina extends StatelessWidget {
             child: Image.network(imageUrl, fit: BoxFit.cover,),
           ),
         ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(title, style: TextStyle(color: Color.fromRGBO(0, 0, 0, 0.87), fontSize: 21, fontWeight: FontWeight.w600),),
-            Text("Autore: $autore", style: TextStyle(color: Color.fromRGBO(0, 0, 0, 0.6)),),
-            Text("Pubblicato il: $date", style: TextStyle(color: Color.fromRGBO(0, 0, 0, 0.6)),),
-          ],
+        Flexible(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              Text(title,overflow: TextOverflow.visible, style: TextStyle(color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87) , fontSize: 21, fontFamily: "OpenSans-Bold", height: 1),),
+              SizedBox(height: 5,),
+              Text("Autore: $autore", style: TextStyle(color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.6) : Color.fromRGBO(255, 255, 255, 0.6), fontFamily: "OpenSans-Light", height: 1.2),),
+              Text("Pubblicato il: $date", style: TextStyle(color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.6) : Color.fromRGBO(255, 255, 255, 0.6), fontFamily: "OpenSans-Light", height: 1.2),),
+            ],
+          ),
         ),
-        Spacer(),
-        IconButton(icon: Icon(Icons.more_vert, color: Color.fromRGBO(0, 0, 0, 0.6),), onPressed: () {}),
+        //IconButton(icon: Icon(Icons.more_vert, color: Color.fromRGBO(0, 0, 0, 0.6),), onPressed: () {}),
       ],
     );
   }

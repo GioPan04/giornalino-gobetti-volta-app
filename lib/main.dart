@@ -8,6 +8,8 @@ import 'dart:convert';
 void main() {
   runApp(MaterialApp(
     initialRoute: '/',
+    theme: ThemeData(),
+    darkTheme: ThemeData.dark(),
     routes: {
       '/': (context) => Home(),
       '/giornale': (context) => GiornaleScreen(),
@@ -30,8 +32,11 @@ class _HomeState extends State<Home> {
     return result["items"];
   }
 
+  bool dark;
+
   @override
   Widget build(BuildContext context) {
+    dark = (MediaQuery.of(context).platformBrightness == Brightness.dark);
     return Scaffold(
       appBar: AppBar(
         title: Text("Giornalino Gobetti Volta"),
@@ -71,8 +76,8 @@ class _HomeState extends State<Home> {
         return Padding(
           padding: EdgeInsets.all(5),
           child: Shimmer.fromColors(
-            highlightColor: Colors.white,
-            baseColor: Colors.grey[300],
+            highlightColor: (!dark) ? Colors.white : Color(0xFFC9C9C9), //Colore sfumatura (+ chiaro)
+            baseColor: (!dark) ? Colors.grey[300] : Color(0xFF636363), //Colore di sfondo
             child: CopertinaLoading(),
           ),
         );
