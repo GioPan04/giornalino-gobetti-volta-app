@@ -26,6 +26,8 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   Future getData() async {
     http.Response response = await http.get("https://ggv.pangio.it/api/get");
     var result = jsonDecode(response.body);
@@ -38,9 +40,13 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     dark = (MediaQuery.of(context).platformBrightness == Brightness.dark);
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text("Giornalino Gobetti Volta"),
         backgroundColor: Color(0xFFF44336),
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.add_comment), onPressed: () => _showDialog(context))
+        ],
       ),
       body: FutureBuilder(
         future: getData(),
@@ -84,5 +90,95 @@ class _HomeState extends State<Home> {
       }
     );
   }
+
+  _showDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (c) {
+        return _Arg(dark: dark, scaffoldKey: _scaffoldKey,);
+      }
+    );
+  }
+
+}
+
+class _Arg extends StatefulWidget {
+  const _Arg({
+    Key key,
+    @required this.dark,
+    this.scaffoldKey,
+  }) : super(key: key);
+
+  final bool dark;
+  final GlobalKey<ScaffoldState> scaffoldKey;
+
+  @override
+  __ArgState createState() => __ArgState();
+}
+
+class __ArgState extends State<_Arg> {
+
+  final TextEditingController argCtrl = TextEditingController();
+  String argError;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text("Segnalaci un'argomento"),
+      content: SingleChildScrollView(
+        child: TextField(
+          keyboardType: TextInputType.text,
+          controller: argCtrl,
+          maxLines: null,
+          minLines: null,
+          maxLength: null,
+          style: new TextStyle(color: (widget.dark) ? Colors.white: Colors.black),
+          onChanged: (str) {
+            if(str.isEmpty) {
+              setState(() {
+                argError = "Compila il campo";
+              });
+            } else {
+              setState(() {
+               argError = null;
+              });
+            }
+          },
+          decoration: InputDecoration(
+            hintText: "Scrivi un'argomento di cui parlare",
+            errorText: argError,
+            hintStyle: TextStyle(color: (widget.dark) ? Colors.white: Colors.black),
+            labelStyle: TextStyle(color: (widget.dark) ? Colors.white: Colors.black),
+            border: OutlineInputBorder(borderSide: BorderSide(color: (widget.dark) ? Colors.white: Colors.black)),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: (widget.dark) ? Colors.white: Colors.black)),
+            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: (widget.dark) ? Colors.white: Colors.black)),
+            fillColor: (widget.dark) ? Colors.white: Colors.black,
+            focusColor: (widget.dark) ? Colors.white: Colors.black,
+            hoverColor: (widget.dark) ? Colors.white: Colors.black,
+          ),
+        ),
+      ),
+      actions: <Widget>[
+        FlatButton(onPressed: () => _sendArg(context, argCtrl.text), child: Text("INVIA"))
+      ],
+    );
+  }
+
+  void _sendArg(BuildContext c, String text) async {
+    if(text.isEmpty) {
+      setState(() {
+        argError = "Compila il campo";
+      });
+    } else {
+      setState(() {
+        argError = null;
+      });
+      http.Response argResponce = await http.post("https://ggv.pangio.it/api/post/arg", headers: {'text': text});
+      Navigator.pop(c);
+      widget.scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(argResponce.body)));
+      //"Argomento inviato correttamente 👍"
+    }
+  }
+
 
 }
