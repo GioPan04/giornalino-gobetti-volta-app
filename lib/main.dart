@@ -4,6 +4,7 @@ import 'package:shimmer/shimmer.dart';
 import 'utils/copertina.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -45,7 +46,7 @@ class _HomeState extends State<Home> {
         title: Text("Giornalino Gobetti Volta"),
         backgroundColor: Color(0xFFF44336),
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.add_comment), onPressed: () => _showDialog(context))
+          IconButton(icon: Icon(Icons.add_comment), onPressed: () => _sendArg(context))
         ],
       ),
       body: FutureBuilder(
@@ -59,7 +60,7 @@ class _HomeState extends State<Home> {
                 return InkWell(
                   child: Padding(
                     padding: EdgeInsets.all(5),
-                    child: Copertina(title: data[i]['title'], imageUrl: data[i]['thumnail_url'], autore: data[i]['author'], date: data[i]['date'],),
+                    child: Copertina(title: data[i]['title'], imageUrl: data[i]['thumnail_url'], autore: data[i]['author'], date: date(data[i]['date']),),
                   ),
                   onTap: () => Navigator.pushNamed(context, '/giornale', arguments: GiornaleScreenArgs(url: data[i]['article_url'], title: data[i]['title'])),
                 );
@@ -71,6 +72,13 @@ class _HomeState extends State<Home> {
         },
       )
     );
+  }
+
+  String date(String timestamp) {
+    
+    var date = new DateTime.fromMillisecondsSinceEpoch(int.parse(timestamp));
+    var format = DateFormat("dd/MM/yyyy");
+    return format.format(date);
   }
 
   _buildShimmer() {
@@ -91,7 +99,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  _showDialog(BuildContext context) {
+  _sendArg(BuildContext context) {
     showDialog(
       context: context,
       builder: (c) {
@@ -144,6 +152,7 @@ class __ArgState extends State<_Arg> {
               });
             }
           },
+          onSubmitted: (str) => _sendArg(context, str),
           decoration: InputDecoration(
             hintText: "Scrivi un'argomento di cui parlare",
             errorText: argError,
@@ -173,12 +182,19 @@ class __ArgState extends State<_Arg> {
       setState(() {
         argError = null;
       });
-      http.Response argResponce = await http.post("https://ggv.pangio.it/api/post/arg", headers: {'text': text});
+      http.Response argResponce = await http.post("https://ggv.pangio.it/api/post/arg/index.php", headers: {"text": text});
       Navigator.pop(c);
-      widget.scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(argResponce.body)));
-      //"Argomento inviato correttamente 👍"
+      var response = jsonDecode(argResponce.body);
+      if(response['error']) {
+        _showSnackBar(response['error']);
+      } else {
+        _showSnackBar("Argomento inviato correttamente 👍");
+      }
     }
   }
 
+  _showSnackBar(String body) {
+    widget.scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(body)));
+  }
 
 }
