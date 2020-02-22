@@ -13,6 +13,9 @@ class GiornaleScreen extends StatefulWidget {
 }
 
 class _GiornaleScreenState extends State<GiornaleScreen> {
+  
+  var charapters;
+  final PageController pageViewController = PageController();
 
   Future getData(String url) async {
     try {
@@ -40,16 +43,32 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
     }
   }
 
-  void showCharapters(BuildContext context) {
+  bool dark;
+  showCharapters(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog();
+        return AlertDialog(
+          title: Text("Vai a capitolo"),
+          content: Container(
+            width: MediaQuery.of(context).size.width,
+            child: ListView.builder(
+              itemCount: charapters.length,
+              itemBuilder: (context, i) {
+                return ListTile(
+                  title: Text(charapters[i]['title']),
+                  onTap: () {
+                    Navigator.pop(context);
+                    pageViewController.animateToPage(i, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+                  },
+                );
+              },
+            ),
+          ),
+        );
       }
     );
   }
-
-  bool dark;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +79,7 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
         backgroundColor: Color(0xFFF44336),
         title: Text(args.title),
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.book), onPressed: () {}),
+          IconButton(icon: Icon(Icons.book), tooltip: "Vai a capitolo", onPressed: () => showCharapters(context)),
         ],
       ),
       body: FutureBuilder(
@@ -69,26 +88,30 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
           if(snapshot.hasData) {
             var data = snapshot.data;
             var pages = data["pages"];
+            charapters = pages;
             if (data['numPages'] > 1){
               return PageView.builder(
                 itemCount: pages.length,
+                controller: pageViewController,
                 itemBuilder: (context, i) {
                   return FutureBuilder(
                     future: getData(pages[i]['pageUrl']),
                     builder: (context, snapshot) {
                       if(snapshot.hasData) {
                         var page = snapshot.data;
-                        return SingleChildScrollView(
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: MarkdownBody(
-                              data: Utf8Decoder(allowMalformed: true).convert(page.toString().codeUnits),
-                              onTapLink: (url) => _launch(url),
-                              styleSheet: MarkdownStyleSheet(
-                                h1: TextStyle(fontFamily: "OpenSans-Bold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 25, height: 2),
-                                h2: TextStyle(fontFamily: "OpenSans-SemiBold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 19, height: 2),
-                                p: TextStyle(fontFamily: "OpenSans-Regular", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), height: 1.15)
-
+                        return Container(
+                          color: Color((pages[i]['backgroundColor'] != null ) ? int.parse('0x' + pages[i]['backgroundColor']) : 0x00FFFFFF),
+                          child: SingleChildScrollView(
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: MarkdownBody(
+                                data: Utf8Decoder(allowMalformed: true).convert(page.toString().codeUnits),
+                                onTapLink: (url) => _launch(url),
+                                styleSheet: MarkdownStyleSheet(
+                                  h1: TextStyle(fontFamily: "OpenSans-Bold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 25, height: 2),
+                                  h2: TextStyle(fontFamily: "OpenSans-SemiBold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 19, height: 2),
+                                  p: TextStyle(fontFamily: "OpenSans-Regular", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), height: 1.15)
+                                ),
                               ),
                             ),
                           ),

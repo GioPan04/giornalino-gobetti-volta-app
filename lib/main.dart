@@ -5,6 +5,7 @@ import 'utils/copertina.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'screens/MercatinoScreen.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -28,18 +29,21 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final PageController _pageController = PageController(initialPage: 0);
+  int currentPage = 0;
 
-  Future getData() async {
-    http.Response response = await http.get("https://ggv.pangio.it/api/get");
-    var result = jsonDecode(response.body);
-    return result["items"];
+  _sendArg(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (c) {
+        return _Arg(scaffoldKey: _scaffoldKey,);
+      }
+    );
   }
 
-  bool dark;
 
   @override
   Widget build(BuildContext context) {
-    dark = (MediaQuery.of(context).platformBrightness == Brightness.dark);
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -49,36 +53,54 @@ class _HomeState extends State<Home> {
           IconButton(icon: Icon(Icons.add_comment), onPressed: () => _sendArg(context))
         ],
       ),
-      body: FutureBuilder(
-        future: getData(),
-        builder: (context, snapshot) {
-          if(snapshot.hasData) {
-            var data = snapshot.data;
-            return ListView.builder(
-              itemCount: data.length,
-              itemBuilder: (context, i) {
-                return InkWell(
-                  child: Padding(
-                    padding: EdgeInsets.all(5),
-                    child: Copertina(title: data[i]['title'], imageUrl: data[i]['thumnail_url'], autore: data[i]['author'], date: date(data[i]['date']),),
-                  ),
-                  onTap: () => Navigator.pushNamed(context, '/giornale', arguments: GiornaleScreenArgs(url: data[i]['article_url'], title: data[i]['title'])),
-                );
-              },
-            );
-          } else {
-            return _buildShimmer();
-          }
+      body: PageView(
+        onPageChanged: (int i) => setState(() => currentPage = i),
+        controller: _pageController,
+        children: <Widget>[
+          HomePageScreen(),
+          MercatinoScreen(),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: (i) {
+          _pageController.animateToPage(i, duration: Duration(milliseconds: 500), curve: Curves.ease);
+          setState(() {
+            currentPage = i;
+          });
         },
-      )
+        selectedItemColor: Color(0xFFF44336),
+        currentIndex: currentPage,
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.new_releases), title: Text("Giornalini")),
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), title: Text("Mercatino"))
+        ]
+      ),
     );
   }
+
+}
+
+class HomePageScreen extends StatefulWidget {
+
+  @override
+  _HomePageScreenState createState() => _HomePageScreenState();
+}
+
+class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAliveClientMixin<HomePageScreen> {
+
+  bool dark;
 
   String date(String timestamp) {
     
     var date = new DateTime.fromMillisecondsSinceEpoch(int.parse(timestamp));
     var format = DateFormat("dd/MM/yyyy");
     return format.format(date);
+  }
+
+  Future getData() async {
+    http.Response response = await http.get("https://ggv.pangio.it/api/get");
+    var result = jsonDecode(response.body);
+    return result["items"];
   }
 
   _buildShimmer() {
@@ -99,25 +121,43 @@ class _HomeState extends State<Home> {
     );
   }
 
-  _sendArg(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (c) {
-        return _Arg(dark: dark, scaffoldKey: _scaffoldKey,);
-      }
+  @override
+  Widget build(BuildContext context) {
+    dark = (MediaQuery.of(context).platformBrightness == Brightness.dark);
+    super.build(context);
+    return FutureBuilder(
+      future: getData(),
+      builder: (context, snapshot) {
+        if(snapshot.hasData) {
+          var data = snapshot.data;
+          return ListView.builder(
+            itemCount: data.length,
+            itemBuilder: (context, i) {
+              return InkWell(
+                child: Padding(
+                  padding: EdgeInsets.all(5),
+                  child: Copertina(title: data[i]['title'], imageUrl: data[i]['thumnail_url'], autore: data[i]['author'], date: date(data[i]['date']),),
+                ),
+                onTap: () => Navigator.pushNamed(context, '/giornale', arguments: GiornaleScreenArgs(url: data[i]['article_url'], title: data[i]['title'])),
+              );
+            },
+          );
+        } else {
+          return _buildShimmer();
+        }
+      },
     );
   }
 
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class _Arg extends StatefulWidget {
   const _Arg({
     Key key,
-    @required this.dark,
     this.scaffoldKey,
   }) : super(key: key);
-
-  final bool dark;
   final GlobalKey<ScaffoldState> scaffoldKey;
 
   @override
@@ -129,8 +169,11 @@ class __ArgState extends State<_Arg> {
   final TextEditingController argCtrl = TextEditingController();
   String argError;
 
+  bool dark;
+
   @override
   Widget build(BuildContext context) {
+    dark = (MediaQuery.of(context).platformBrightness == Brightness.dark);
     return AlertDialog(
       title: Text("Segnalaci un'argomento"),
       content: SingleChildScrollView(
@@ -140,7 +183,7 @@ class __ArgState extends State<_Arg> {
           maxLines: null,
           minLines: null,
           maxLength: null,
-          style: new TextStyle(color: (widget.dark) ? Colors.white: Colors.black),
+          style: new TextStyle(color: (dark) ? Colors.white: Colors.black),
           onChanged: (str) {
             if(str.isEmpty) {
               setState(() {
@@ -156,14 +199,14 @@ class __ArgState extends State<_Arg> {
           decoration: InputDecoration(
             hintText: "Scrivi un'argomento di cui parlare",
             errorText: argError,
-            hintStyle: TextStyle(color: (widget.dark) ? Colors.white: Colors.black),
-            labelStyle: TextStyle(color: (widget.dark) ? Colors.white: Colors.black),
-            border: OutlineInputBorder(borderSide: BorderSide(color: (widget.dark) ? Colors.white: Colors.black)),
-            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: (widget.dark) ? Colors.white: Colors.black)),
-            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: (widget.dark) ? Colors.white: Colors.black)),
-            fillColor: (widget.dark) ? Colors.white: Colors.black,
-            focusColor: (widget.dark) ? Colors.white: Colors.black,
-            hoverColor: (widget.dark) ? Colors.white: Colors.black,
+            hintStyle: TextStyle(color: (dark) ? Colors.white: Colors.black),
+            labelStyle: TextStyle(color: (dark) ? Colors.white: Colors.black),
+            border: OutlineInputBorder(borderSide: BorderSide(color: (dark) ? Colors.white: Colors.black)),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: (dark) ? Colors.white: Colors.black)),
+            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: (dark) ? Colors.white: Colors.black)),
+            fillColor: (dark) ? Colors.white: Colors.black,
+            focusColor: (dark) ? Colors.white: Colors.black,
+            hoverColor: (dark) ? Colors.white: Colors.black,
           ),
         ),
       ),
