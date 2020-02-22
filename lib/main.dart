@@ -46,9 +46,10 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      backgroundColor: Color(0xFF404040),
       appBar: AppBar(
-        title: Text("Giornalino Gobetti Volta"),
-        backgroundColor: Color(0xFFF44336),
+        title: Text("the News Times", style: TextStyle(fontFamily: "NanumMyeongjo-Regular", fontSize: 24),),
+        backgroundColor: Color(0xFF303030),
         actions: <Widget>[
           IconButton(icon: Icon(Icons.add_comment), onPressed: () => _sendArg(context))
         ],

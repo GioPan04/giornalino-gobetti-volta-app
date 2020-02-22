@@ -35,3 +35,15 @@ flutter:
     - family: OpenSans-Light
       fonts:
         - asset: fonts/OpenSans-Light.ttf
+    - family: RobotoSlab
+      fonts:
+        - asset: fonts/RobotoSlab.ttf
+    - family: NanumMyeongjo-Regular
+      fonts:
+        - asset: fonts/NanumMyeongjo-Regular.ttf
+    - family: NanumMyeongjo-Regular
+      fonts:
+        - asset: fonts/NanumMyeongjo-Bold.ttf
+    - family: NanumMyeongjo-Regular
+      fonts:
+        - asset: fonts/NanumMyeongjo-ExtraBold.ttf

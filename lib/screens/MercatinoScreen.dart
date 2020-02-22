@@ -19,6 +19,14 @@ class _MercatinoScreenState extends State<MercatinoScreen> with AutomaticKeepAli
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Image.network("https://hd.tudocdn.net/898005?w=660&h=414",),
+            SizedBox(height: 3),
+            Row(
+              children: <Widget>[
+                Text("Tesla Cybertruck", style: TextStyle(fontSize: 28, color: Color.fromRGBO(255, 255, 255, 0.87)),),
+                Spacer(),
+                Text("€ 10", style: TextStyle(fontSize: 34, color: Color.fromRGBO(255, 255, 255, 0.6), fontFamily: "RobotoSlab"),),
+              ],
+            )
           ],
         ),
       ],
