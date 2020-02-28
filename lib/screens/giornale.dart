@@ -76,14 +76,14 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
     dark = (MediaQuery.of(context).platformBrightness == Brightness.dark);
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFFF44336),
+        
         title: Text(args.title),
         actions: <Widget>[
           IconButton(icon: Icon(Icons.book), tooltip: "Vai a capitolo", onPressed: () => showCharapters(context)),
         ],
       ),
       body: FutureBuilder(
-        future: getJSONData("https://ggv.pangio.it/data/1582135700/index.json"),
+        future: getJSONData(args.url),
         builder: (context, snapshot) {
           if(snapshot.hasData) {
             var data = snapshot.data;

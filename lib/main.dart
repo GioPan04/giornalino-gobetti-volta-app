@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:giornalino_gv_app/screens/AboutScreen.dart';
+import 'package:giornalino_gv_app/screens/FirstScreen.dart';
 import 'screens/giornale.dart';
 import 'package:shimmer/shimmer.dart';
 import 'utils/copertina.dart';
@@ -10,13 +12,36 @@ import 'screens/MercatinoScreen.dart';
 void main() {
   runApp(MaterialApp(
     initialRoute: '/',
-    theme: ThemeData(),
-    darkTheme: ThemeData.dark(),
+    theme: ThemeData(
+      
+    ),
+    darkTheme: ThemeData(
+      primaryColor: Color(0xFF000000),
+      scaffoldBackgroundColor: Color(0xFF222222),
+      accentColor: Color(0xFFFFFFFF),
+      bottomAppBarColor: Color(0xFF000000),
+      bottomAppBarTheme: BottomAppBarTheme(color: Color(0xFF000000)),
+      canvasColor: Color(0xFF000000),
+      colorScheme: ColorScheme.dark(
+        primary: Color(0xFFFFFFFF),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: Color(0xFF000000),
+      ),
+      accentIconTheme: IconThemeData(color: Color(0xFFFFFFFF)),
+      primaryIconTheme: IconThemeData(color: Color(0xFFFFFFFF)),
+      brightness: Brightness.dark,
+      iconTheme: IconThemeData(color: Color(0xFFFFFFFF)),
+      textTheme: TextTheme(body1: TextStyle(color: Color(0xFFFFFFFF)), button: TextStyle(color: Color(0xFFFFFFFF)), subtitle: TextStyle(color: Color(0xFFFFFFFF)), title: TextStyle(color: Color(0xFFFFFFFF)), subhead: TextStyle(color: Color(0xFFFFFFFF)), caption: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.7))),
+    ),
     routes: {
       '/': (context) => Home(),
       '/giornale': (context) => GiornaleScreen(),
+      '/about': (context) => AboutScreen(),
+      '/first': (context) => FirstScreen(),
     },
-  ));
+  )
+  );
 }
 
 class Home extends StatefulWidget {
@@ -29,8 +54,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  final PageController _pageController = PageController(initialPage: 0);
-  int currentPage = 0;
+  //final PageController _pageController = PageController(initialPage: 0);
+  //int currentPage = 0;
 
   _sendArg(BuildContext context) {
     showDialog(
@@ -41,36 +66,43 @@ class _HomeState extends State<Home> {
     );
   }
 
+  _sellOn(BuildContext context) {
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Color(0xFF404040),
       appBar: AppBar(
-        title: Text("the News Times", style: TextStyle(fontFamily: "NanumMyeongjo-Regular", fontSize: 24),),
-        backgroundColor: Color(0xFF303030),
+        centerTitle: true,
+        title: Text("Gobetti Volta Reporter", style: TextStyle(fontFamily: "NanumMyeongjo-Regular", fontSize: 20),),
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.add_comment), onPressed: () => _sendArg(context))
+          IconButton(icon: Icon(Icons.adjust), onPressed: () => Navigator.of(context).pushNamed('/first')),
         ],
+        leading: IconButton(icon: Icon(Icons.info_outline), onPressed: () => Navigator.pushNamed(context, '/about')),
       ),
-      body: PageView(
+      
+      body: HomePageScreen(),
+      /*PageView(
         onPageChanged: (int i) => setState(() => currentPage = i),
         controller: _pageController,
         children: <Widget>[
           HomePageScreen(),
           MercatinoScreen(),
         ],
-      ),
+      ),*/
+      floatingActionButton: (true) ? FloatingActionButton(child: Icon(Icons.add_comment, color: Colors.white,), onPressed: () => _sendArg(context)) : FloatingActionButton(child: Icon(Icons.add), onPressed: () => _sellOn(context)),
       bottomNavigationBar: BottomNavigationBar(
         onTap: (i) {
-          _pageController.animateToPage(i, duration: Duration(milliseconds: 500), curve: Curves.ease);
+          if(i == 1) _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("Coming Soon! 😉"),));
+          /*_pageController.animateToPage(i, duration: Duration(milliseconds: 500), curve: Curves.ease);
           setState(() {
             currentPage = i;
-          });
+          });*/
         },
-        selectedItemColor: Color(0xFFF44336),
-        currentIndex: currentPage,
+        currentIndex: 0,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.new_releases), title: Text("Giornalini")),
           BottomNavigationBarItem(icon: Icon(Icons.dashboard), title: Text("Mercatino"))
@@ -142,6 +174,19 @@ class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAlive
                 onTap: () => Navigator.pushNamed(context, '/giornale', arguments: GiornaleScreenArgs(url: data[i]['article_url'], title: data[i]['title'])),
               );
             },
+          );
+        } else if(snapshot.hasError) {
+          return Container(
+            width: double.infinity,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Text("😩", style: TextStyle(fontSize: 60), textAlign: TextAlign.center,),
+                Text("Si è verificato un'errore,\ncontrolla la connessione ad Internet", textAlign: TextAlign.center,)
+              ],
+            ),
           );
         } else {
           return _buildShimmer();
@@ -226,10 +271,10 @@ class __ArgState extends State<_Arg> {
       setState(() {
         argError = null;
       });
-      http.Response argResponce = await http.post("https://ggv.pangio.it/api/post/arg/index.php", headers: {"text": text});
+      http.Response argResponce = await http.post("https://ggv.pangio.it/api/post/arg/index.php", body: {"text": text});
       Navigator.pop(c);
       var response = jsonDecode(argResponce.body);
-      if(response['error']) {
+      if(response['error'] == true) {
         _showSnackBar(response['error']);
       } else {
         _showSnackBar("Argomento inviato correttamente 👍");
