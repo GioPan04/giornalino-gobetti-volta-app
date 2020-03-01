@@ -125,7 +125,7 @@ class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAlive
 
   String date(String timestamp) {
     
-    var date = new DateTime.fromMillisecondsSinceEpoch(int.parse(timestamp));
+    var date = new DateTime.fromMillisecondsSinceEpoch(int.parse(timestamp) * 1000);
     var format = DateFormat("dd/MM/yyyy");
     return format.format(date);
   }
@@ -183,7 +183,10 @@ class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAlive
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                Text("😩", style: TextStyle(fontSize: 60), textAlign: TextAlign.center,),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: Text("😩", style: TextStyle(fontSize: 50), textAlign: TextAlign.center,),
+                ),
                 Text("Si è verificato un'errore,\ncontrolla la connessione ad Internet", textAlign: TextAlign.center,)
               ],
             ),
@@ -275,7 +278,7 @@ class __ArgState extends State<_Arg> {
       Navigator.pop(c);
       var response = jsonDecode(argResponce.body);
       if(response['error'] == true) {
-        _showSnackBar(response['error']);
+        _showSnackBar(response['msg']);
       } else {
         _showSnackBar("Argomento inviato correttamente 👍");
       }
