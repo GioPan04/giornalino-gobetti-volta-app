@@ -56,7 +56,7 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
               itemCount: charapters.length,
               itemBuilder: (context, i) {
                 return ListTile(
-                  title: Text(charapters[i]['title']),
+                  title: Text(Utf8Decoder(allowMalformed: true).convert(charapters[i]['title'].toString().codeUnits), style: TextStyle(fontWeight: (i == pageViewController.page.round()) ? FontWeight.w700 : FontWeight.w400),),
                   onTap: () {
                     Navigator.pop(context);
                     pageViewController.animateToPage(i, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
@@ -73,7 +73,7 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
   @override
   Widget build(BuildContext context) {
     final GiornaleScreenArgs args = ModalRoute.of(context).settings.arguments;
-    dark = (MediaQuery.of(context).platformBrightness == Brightness.dark);
+    dark = /*(MediaQuery.of(context).platformBrightness == Brightness.dark);*/ true;
     return Scaffold(
       appBar: AppBar(
         
@@ -82,6 +82,7 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
           IconButton(icon: Icon(Icons.book), tooltip: "Vai a capitolo", onPressed: () => showCharapters(context)),
         ],
       ),
+      
       body: FutureBuilder(
         future: getJSONData(args.url),
         builder: (context, snapshot) {
@@ -89,7 +90,7 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
             var data = snapshot.data;
             var pages = data["pages"];
             charapters = pages;
-            if (data['numPages'] > 1){
+            /*if (data['numPages'] > 1){*/
               return PageView.builder(
                 itemCount: pages.length,
                 controller: pageViewController,
@@ -104,27 +105,36 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
                           child: SingleChildScrollView(
                             child: Padding(
                               padding: EdgeInsets.all(8.0),
-                              child: MarkdownBody(
-                                data: Utf8Decoder(allowMalformed: true).convert(page.toString().codeUnits),
-                                onTapLink: (url) => _launch(url),
-                                styleSheet: MarkdownStyleSheet(
-                                  h1: TextStyle(fontFamily: "OpenSans-Bold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 25, height: 2),
-                                  h2: TextStyle(fontFamily: "OpenSans-SemiBold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 19, height: 2),
-                                  p: TextStyle(fontFamily: "OpenSans-Regular", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), height: 1.15)
+                              child: Padding(
+                                padding: EdgeInsets.only(bottom: 30),
+                                child: MarkdownBody(
+                                  
+                                  data: Utf8Decoder(allowMalformed: true).convert(page.toString().codeUnits),
+                                  onTapLink: (url) => _launch(url),
+                                  styleSheet: MarkdownStyleSheet(
+                                    textAlign: WrapAlignment.spaceEvenly,
+                                    h1: TextStyle(fontFamily: "OpenSans-Bold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 25, height: 2),
+                                    h2: TextStyle(fontFamily: "OpenSans-SemiBold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 23, height: 2),
+                                    p: TextStyle(fontFamily: "OpenSans-Regular", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), height: 1.15, fontSize: 16)
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         );
                       } else if(snapshot.hasError) {
-                        return Center(
+                        return Container(
+                          width: double.infinity,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
-                              Icon(Icons.error_outline, size: 80,),
-                              SizedBox(height: 10),
-                              Text("Si è verificato un'errore\nRiprova più tardi", textAlign: TextAlign.center,),
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 10),
+                                child: Text("😩", style: TextStyle(fontSize: 50), textAlign: TextAlign.center,),
+                              ),
+                              Text("Si è verificato un'errore,\ncontrolla la connessione ad Internet", textAlign: TextAlign.center,)
                             ],
                           ),
                         );
@@ -134,12 +144,26 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
                     }
                   );
                 },
-              );
+              );/*
             } else {
               return Container();
-            }
+            }*/
           } else if(snapshot.hasError) {
-            return Center(child: Text("Error ${snapshot.error}"),);
+            return Container(
+              width: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 10),
+                    child: Text("😩", style: TextStyle(fontSize: 50), textAlign: TextAlign.center,),
+                  ),
+                  Text("Si è verificato un'errore,\ncontrolla la connessione ad Internet", textAlign: TextAlign.center,)
+                ],
+              ),
+            );
           } else {
             return Center(child: CircularProgressIndicator());
           }

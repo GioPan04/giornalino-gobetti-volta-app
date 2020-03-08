@@ -2,6 +2,8 @@ import 'package:animator/animator.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class FirstScreen extends StatefulWidget {
   FirstScreen({Key key}) : super(key: key);
 
@@ -10,6 +12,12 @@ class FirstScreen extends StatefulWidget {
 }
 
 class _FirstScreenState extends State<FirstScreen> with TickerProviderStateMixin {
+
+  _saveStart(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('started', true);
+    Navigator.pushReplacementNamed(context, '/');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,21 +39,21 @@ class _FirstScreenState extends State<FirstScreen> with TickerProviderStateMixin
               ),
             ),
           ),
-          Align(alignment: Alignment.center,child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: RichText(
-              text: TextSpan(
-                style: TextStyle(fontFamily: "RobotoSlab", fontSize: 20),
+          Align(
+            alignment: Alignment.center,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  TextSpan(text: "Ciao e benvenuto su GV Reporter!", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 23)),
-                  TextSpan(text: "\nL'app ufficiale del giornalino scolastico dell'I.S.I.S. Gobetti Volta.", style: TextStyle(fontWeight: FontWeight.w300,)),
+                  Text("Ciao e benvenuto su GV Reporter!", style: TextStyle(fontFamily: "RobotoSlab", fontWeight: FontWeight.w600, fontSize: 23), textAlign: TextAlign.center,),
+                  Padding(padding: EdgeInsets.only(bottom: 10)),
+                  Text("L'app ufficiale del giornalino scolastico dell'I.S.I.S. Gobetti Volta.", style: TextStyle(fontFamily: "RobotoSlab", fontWeight: FontWeight.w300, fontSize: 20), textAlign: TextAlign.center,),
                 ]
               ),
-              textAlign: TextAlign.center,
-              
             ),
-          )),
-          
+          ),
         ],
       ),
       bottomNavigationBar: SafeArea(
@@ -55,9 +63,9 @@ class _FirstScreenState extends State<FirstScreen> with TickerProviderStateMixin
             children: <Widget>[
               Spacer(),
               RaisedButton(
-                child: Text("CONTUNUA", style: TextStyle(color: Color(0xFF000000)),),
+                child: Text("CONTINUA", style: TextStyle(color: Color(0xFF000000)),),
                 color: Color(0xFFFFFFFF),
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => _saveStart(context),
               )
             ]
           ),

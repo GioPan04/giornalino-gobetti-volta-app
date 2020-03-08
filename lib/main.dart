@@ -8,10 +8,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'screens/MercatinoScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MaterialApp(
     initialRoute: '/',
+    themeMode: ThemeMode.dark,
+    debugShowCheckedModeBanner: false,
     theme: ThemeData(
       
     ),
@@ -70,6 +73,19 @@ class _HomeState extends State<Home> {
 
   }
 
+  _check(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('started') == null || prefs.getBool('started') == false) {
+      Navigator.of(context).pushReplacementNamed('/first');
+    }
+  }
+
+  @override
+  void initState() {
+    _check(context);
+    super.initState();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -79,21 +95,12 @@ class _HomeState extends State<Home> {
         centerTitle: true,
         title: Text("Gobetti Volta Reporter", style: TextStyle(fontFamily: "NanumMyeongjo-Regular", fontSize: 20),),
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.adjust), onPressed: () => Navigator.of(context).pushNamed('/first')),
+          IconButton(icon: Icon(Icons.info_outline), onPressed: () => Navigator.of(context).pushNamed('/about')),
         ],
-        leading: IconButton(icon: Icon(Icons.info_outline), onPressed: () => Navigator.pushNamed(context, '/about')),
       ),
       
       body: HomePageScreen(),
-      /*PageView(
-        onPageChanged: (int i) => setState(() => currentPage = i),
-        controller: _pageController,
-        children: <Widget>[
-          HomePageScreen(),
-          MercatinoScreen(),
-        ],
-      ),*/
-      floatingActionButton: (true) ? FloatingActionButton(child: Icon(Icons.add_comment, color: Colors.white,), onPressed: () => _sendArg(context)) : FloatingActionButton(child: Icon(Icons.add), onPressed: () => _sellOn(context)),
+      floatingActionButton: (true) ? FloatingActionButton(tooltip: "Suggerisci un'argomento di cui parlare", child: Icon(Icons.add_comment, color: Colors.white,), onPressed: () => _sendArg(context)) : FloatingActionButton(child: Icon(Icons.add), onPressed: () => _sellOn(context)),
       bottomNavigationBar: BottomNavigationBar(
         onTap: (i) {
           if(i == 1) _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("Coming Soon! 😉"),));
@@ -104,7 +111,7 @@ class _HomeState extends State<Home> {
         },
         currentIndex: 0,
         items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.new_releases), title: Text("Giornalini")),
+          BottomNavigationBarItem(icon: Icon(Icons.library_books), title: Text("Edizioni")),
           BottomNavigationBarItem(icon: Icon(Icons.dashboard), title: Text("Mercatino"))
         ]
       ),
@@ -122,9 +129,30 @@ class HomePageScreen extends StatefulWidget {
 class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAliveClientMixin<HomePageScreen> {
 
   bool dark;
+  List<String> readed = [];
+  Future data;
+
+  @override
+  void initState() {
+    data = getData();
+    super.initState();
+    _getReaded();
+  }
+
+  _getReaded() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      readed = prefs.getStringList('readed') ?? [];
+    });
+  }
+
+  _addRead() async {
+    final prefs = await SharedPreferences.getInstance();
+    print(readed.runtimeType);
+    prefs.setStringList('readed', readed);
+  }
 
   String date(String timestamp) {
-    
     var date = new DateTime.fromMillisecondsSinceEpoch(int.parse(timestamp) * 1000);
     var format = DateFormat("dd/MM/yyyy");
     return format.format(date);
@@ -156,10 +184,10 @@ class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAlive
 
   @override
   Widget build(BuildContext context) {
-    dark = (MediaQuery.of(context).platformBrightness == Brightness.dark);
+    dark = /*(MediaQuery.of(context).platformBrightness == Brightness.dark);*/ true;
     super.build(context);
     return FutureBuilder(
-      future: getData(),
+      future: data,
       builder: (context, snapshot) {
         if(snapshot.hasData) {
           var data = snapshot.data;
@@ -169,9 +197,18 @@ class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAlive
               return InkWell(
                 child: Padding(
                   padding: EdgeInsets.all(5),
-                  child: Copertina(title: data[i]['title'], imageUrl: data[i]['thumnail_url'], autore: data[i]['author'], date: date(data[i]['date']),),
+                  child: Copertina(title: data[i]['title'], imageUrl: data[i]['thumnail_url'], autore: data[i]['author'], date: date(data[i]['date']), read: !readed.contains(data[i]['id'].toString()),),
                 ),
-                onTap: () => Navigator.pushNamed(context, '/giornale', arguments: GiornaleScreenArgs(url: data[i]['article_url'], title: data[i]['title'])),
+                onTap: () {
+                  if(!readed.contains(data[i]['id'].toString())) {
+                    setState(() {
+                      readed.add(data[i]['id'].toString());
+                    });
+                    _addRead();
+                  }
+                  Navigator.pushNamed(context, '/giornale', arguments: GiornaleScreenArgs(url: data[i]['article_url'], title: data[i]['title']));
+
+                } 
               );
             },
           );
@@ -222,7 +259,7 @@ class __ArgState extends State<_Arg> {
 
   @override
   Widget build(BuildContext context) {
-    dark = (MediaQuery.of(context).platformBrightness == Brightness.dark);
+    dark = /*(MediaQuery.of(context).platformBrightness == Brightness.dark);*/ true;
     return AlertDialog(
       title: Text("Segnalaci un'argomento"),
       content: SingleChildScrollView(
