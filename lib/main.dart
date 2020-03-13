@@ -9,6 +9,9 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'screens/MercatinoScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'screens/authenticate/AuthenticateScreen.dart';
+import 'package:unicorndial/unicorndial.dart';
+import 'screens/ItemScreen.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -42,6 +45,7 @@ void main() {
       '/giornale': (context) => GiornaleScreen(),
       '/about': (context) => AboutScreen(),
       '/first': (context) => FirstScreen(),
+      '/item': (context) => ItemScreen(),
     },
   )
   );
@@ -57,8 +61,9 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  //final PageController _pageController = PageController(initialPage: 0);
-  //int currentPage = 0;
+  final PageController _pageController = PageController(initialPage: 0);
+  int currentPage = 0;
+  bool logged = true;
 
   _sendArg(BuildContext context) {
     showDialog(
@@ -99,17 +104,64 @@ class _HomeState extends State<Home> {
         ],
       ),
       
-      body: HomePageScreen(),
-      floatingActionButton: (true) ? FloatingActionButton(tooltip: "Suggerisci un'argomento di cui parlare", child: Icon(Icons.add_comment, color: Colors.white,), onPressed: () => _sendArg(context)) : FloatingActionButton(child: Icon(Icons.add), onPressed: () => _sellOn(context)),
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: (i) {
-          if(i == 1) _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("Coming Soon! 😉"),));
-          /*_pageController.animateToPage(i, duration: Duration(milliseconds: 500), curve: Curves.ease);
+      body: PageView(
+        onPageChanged: (i) {
           setState(() {
             currentPage = i;
-          });*/
+          });
         },
-        currentIndex: 0,
+        children: <Widget>[
+          HomePageScreen(),
+          (logged) ? MercatinoScreen() : Login(),
+        ],
+      ),
+      floatingActionButton: UnicornDialer(
+        hasBackground: false,
+        parentHeroTag: "ahbho",
+        childButtons: <UnicornButton>[
+          UnicornButton(
+            hasLabel: true,
+            labelText: "Cerca",
+            
+            currentButton: FloatingActionButton(
+              child: Icon(Icons.search),
+              heroTag: "search",
+              onPressed: () {},
+              mini: true,
+            ),
+          ),
+          UnicornButton(
+            hasLabel: true,
+            labelText: "Aggiungi al mercatino",
+            currentButton: FloatingActionButton(
+              child: Icon(Icons.add),
+              onPressed: () {},
+              heroTag: "aggmercato",
+              mini: true,
+            ),
+          ),
+          UnicornButton(
+            hasLabel: true,
+            labelText: "Invia un'argomento",
+            currentButton: FloatingActionButton(
+              child: Icon(Icons.add_comment),
+              onPressed: () {},
+              heroTag: "sendag",
+              mini: true,
+            ),
+          ),
+        ],
+        parentButton: Icon(Icons.more_vert)
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: (i) {
+          //if(i == 1) _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("Coming Soon! 😉"),));
+          _pageController.animateToPage(i, duration: Duration(milliseconds: 500), curve: Curves.ease);
+          setState(() {
+            currentPage = i;
+          });
+        },
+        currentIndex: currentPage,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.library_books), title: Text("Edizioni")),
           BottomNavigationBarItem(icon: Icon(Icons.dashboard), title: Text("Mercatino"))

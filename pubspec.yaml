@@ -17,10 +17,14 @@ dependencies:
   url_launcher: ^5.4.1
   cupertino_icons: ^0.1.2
   intl: ^0.16.1
-  share: ^0.6.3+6
   animator: ^1.0.0+5
   shared_preferences: ^0.5.6+2
   animations: ^1.0.0+5
+  share: ^0.6.3+6
+  firebase_auth: ^0.14.0+5
+  cloud_firestore: ^0.12.9+4
+  flare_flutter: ^2.0.1
+  unicorndial: ^1.1.5
 
 dev_dependencies:
   flutter_test:
@@ -49,9 +53,9 @@ flutter:
     - family: NanumMyeongjo-Regular
       fonts:
         - asset: fonts/NanumMyeongjo-Regular.ttf
-    - family: NanumMyeongjo-Regular
+    - family: NanumMyeongjo-Bold
       fonts:
         - asset: fonts/NanumMyeongjo-Bold.ttf
-    - family: NanumMyeongjo-Regular
+    - family: NanumMyeongjo-ExtraBold
       fonts:
         - asset: fonts/NanumMyeongjo-ExtraBold.ttf

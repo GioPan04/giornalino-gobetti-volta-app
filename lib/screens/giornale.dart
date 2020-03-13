@@ -4,6 +4,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flare_flutter/flare_actor.dart';
 
 class GiornaleScreen extends StatefulWidget {
   GiornaleScreen({Key key}) : super(key: key);
@@ -43,6 +44,36 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
     }
   }
 
+  Widget _charapterClicker() {
+    return Positioned(
+      top: 22,
+      right: -6,
+      child: SizedBox(
+        width: 60,
+        height: 60,
+        child: FlareActor('assets/Clicker.flr',
+          alignment: Alignment.center,
+          fit: BoxFit.contain,
+          animation: 'Main',
+          isPaused: false,
+        ),
+      ),
+    );
+  }
+
+  Widget _slider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: FlareActor('assets/Scroll.flr',
+          alignment: Alignment.center,
+          fit: BoxFit.contain,
+          animation: 'Main',
+          isPaused: false,
+        ),
+    );
+  }
+
+
   bool dark;
   showCharapters(BuildContext context) {
     showDialog(
@@ -74,143 +105,119 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
   Widget build(BuildContext context) {
     final GiornaleScreenArgs args = ModalRoute.of(context).settings.arguments;
     dark = /*(MediaQuery.of(context).platformBrightness == Brightness.dark);*/ true;
-    return Scaffold(
-      appBar: AppBar(
-        
-        title: Text(args.title),
-        actions: <Widget>[
-          IconButton(icon: Icon(Icons.book), tooltip: "Vai a capitolo", onPressed: () => showCharapters(context)),
-        ],
-      ),
-      
-      body: FutureBuilder(
-        future: getJSONData(args.url),
-        builder: (context, snapshot) {
-          if(snapshot.hasData) {
-            var data = snapshot.data;
-            var pages = data["pages"];
-            charapters = pages;
-            /*if (data['numPages'] > 1){*/
-              return PageView.builder(
-                itemCount: pages.length,
-                controller: pageViewController,
-                itemBuilder: (context, i) {
-                  return FutureBuilder(
-                    future: getData(pages[i]['pageUrl']),
-                    builder: (context, snapshot) {
-                      if(snapshot.hasData) {
-                        var page = snapshot.data;
-                        return Container(
-                          color: Color((pages[i]['backgroundColor'] != null ) ? int.parse('0x' + pages[i]['backgroundColor']) : 0x00FFFFFF),
-                          child: SingleChildScrollView(
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Padding(
-                                padding: EdgeInsets.only(bottom: 30),
-                                child: MarkdownBody(
-                                  
-                                  data: Utf8Decoder(allowMalformed: true).convert(page.toString().codeUnits),
-                                  onTapLink: (url) => _launch(url),
-                                  styleSheet: MarkdownStyleSheet(
-                                    textAlign: WrapAlignment.spaceEvenly,
-                                    h1: TextStyle(fontFamily: "OpenSans-Bold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 25, height: 2),
-                                    h2: TextStyle(fontFamily: "OpenSans-SemiBold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 23, height: 2),
-                                    p: TextStyle(fontFamily: "OpenSans-Regular", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), height: 1.15, fontSize: 16)
+    return Stack(
+      children: <Widget>[
+        Scaffold(
+          appBar: AppBar(
+            title: Text(args.title),
+            actions: <Widget>[
+              IconButton(icon: Icon(Icons.book), tooltip: "Vai a capitolo", onPressed: () => showCharapters(context)),
+            ],
+          ),
+          body: Stack(
+            alignment: Alignment.center,
+            children: <Widget>[
+              FutureBuilder(
+                future: getJSONData(args.url),
+                builder: (context, snapshot) {
+                  if(snapshot.hasData) {
+                    var data = snapshot.data;
+                    var pages = data["pages"];
+                    charapters = pages;
+                    /*if (data['numPages'] > 1){*/
+                      return PageView.builder(
+                        itemCount: pages.length,
+                        controller: pageViewController,
+                        itemBuilder: (context, i) {
+                          return FutureBuilder(
+                            future: getData(pages[i]['pageUrl']),
+                            builder: (context, snapshot) {
+                              if(snapshot.hasData) {
+                                var page = snapshot.data;
+                                return Container(
+                                  color: Color((pages[i]['backgroundColor'] != null ) ? int.parse('0x' + pages[i]['backgroundColor']) : 0x00FFFFFF),
+                                  child: SingleChildScrollView(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Padding(
+                                        padding: EdgeInsets.only(bottom: 30),
+                                        child: MarkdownBody(
+                                          
+                                          data: Utf8Decoder(allowMalformed: true).convert(page.toString().codeUnits),
+                                          onTapLink: (url) => _launch(url),
+                                          styleSheet: MarkdownStyleSheet(
+                                            textAlign: WrapAlignment.spaceEvenly,
+                                            h1: TextStyle(fontFamily: "OpenSans-Bold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 25, height: 2),
+                                            h2: TextStyle(fontFamily: "OpenSans-SemiBold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 23, height: 2),
+                                            p: TextStyle(fontFamily: "OpenSans-Regular", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), height: 1.15, fontSize: 16)
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ),
+                                );
+                              } else if(snapshot.hasError) {
+                                return Container(
+                                  width: double.infinity,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: <Widget>[
+                                      Padding(
+                                        padding: EdgeInsets.only(bottom: 10),
+                                        child: Text("😩", style: TextStyle(fontSize: 50), textAlign: TextAlign.center,),
+                                      ),
+                                      Text("Si è verificato un'errore,\ncontrolla la connessione ad Internet", textAlign: TextAlign.center,)
+                                    ],
+                                  ),
+                                );
+                              } else {
+                                return Center(child: CircularProgressIndicator(),);
+                              }
+                            }
+                          );
+                        },
+                      );/*
+                    } else {
+                      return Container();
+                    }*/
+                  } else if(snapshot.hasError) {
+                    return Container(
+                      width: double.infinity,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          Padding(
+                            padding: EdgeInsets.only(bottom: 10),
+                            child: Text("😩", style: TextStyle(fontSize: 50), textAlign: TextAlign.center,),
                           ),
-                        );
-                      } else if(snapshot.hasError) {
-                        return Container(
-                          width: double.infinity,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                              Padding(
-                                padding: EdgeInsets.only(bottom: 10),
-                                child: Text("😩", style: TextStyle(fontSize: 50), textAlign: TextAlign.center,),
-                              ),
-                              Text("Si è verificato un'errore,\ncontrolla la connessione ad Internet", textAlign: TextAlign.center,)
-                            ],
-                          ),
-                        );
-                      } else {
-                        return Center(child: CircularProgressIndicator(),);
-                      }
-                    }
-                  );
+                          Text("Si è verificato un'errore,\ncontrolla la connessione ad Internet", textAlign: TextAlign.center,)
+                        ],
+                      ),
+                    );
+                  } else {
+                    return Center(child: CircularProgressIndicator());
+                  }
                 },
-              );/*
-            } else {
-              return Container();
-            }*/
-          } else if(snapshot.hasError) {
-            return Container(
-              width: double.infinity,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 10),
-                    child: Text("😩", style: TextStyle(fontSize: 50), textAlign: TextAlign.center,),
-                  ),
-                  Text("Si è verificato un'errore,\ncontrolla la connessione ad Internet", textAlign: TextAlign.center,)
-                ],
               ),
-            );
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
+              Column(
+                children: <Widget>[
+                  Container(color: Color(0xAA000000)),
+              _slider(),
+                ],
+              )
+              
+            ],
+          ),
+        ),
+        _charapterClicker(),
+        
+      ],
     );
   }
-
-
-  /*
-    FutureBuilder(
-      future: getData(args.url),
-          builder: (context, snapshot) {
-            if(snapshot.hasData) {
-              return SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: MarkdownBody(
-                    data: Utf8Decoder(allowMalformed: true).convert(snapshot.data.toString().codeUnits),
-                    onTapLink: (url) => _launch(url),
-                    styleSheet: MarkdownStyleSheet(
-                      h1: TextStyle(fontFamily: "OpenSans-Bold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 25, height: 2),
-                      h2: TextStyle(fontFamily: "OpenSans-SemiBold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 19, height: 2),
-                      p: TextStyle(fontFamily: "OpenSans-Regular", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), height: 1.15)
-
-                    ),
-                  ),
-                ),
-              );
-            } else if(snapshot.hasError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(Icons.error_outline, size: 80,),
-                    SizedBox(height: 10),
-                    Text("Si è verificato un'errore\nRiprova più tardi", textAlign: TextAlign.center,),
-                  ],
-                ),
-              );
-            } else {
-              return Center(child: CircularProgressIndicator(),);
-            }
-          }
-        ),
-  */
 }
 
 class GiornaleScreenArgs {
