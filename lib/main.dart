@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:giornalino_gv_app/screens/AboutScreen.dart';
 import 'package:giornalino_gv_app/screens/FirstScreen.dart';
@@ -7,11 +11,11 @@ import 'utils/copertina.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
-import 'screens/MercatinoScreen.dart';
+//import 'screens/MercatinoScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'screens/authenticate/AuthenticateScreen.dart';
-import 'package:unicorndial/unicorndial.dart';
-import 'screens/ItemScreen.dart';
+//import 'screens/authenticate/AuthenticateScreen.dart';
+//import 'screens/ItemScreen.dart';
+//import 'screens/authenticate/AuthenticateScreen.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -45,7 +49,9 @@ void main() {
       '/giornale': (context) => GiornaleScreen(),
       '/about': (context) => AboutScreen(),
       '/first': (context) => FirstScreen(),
-      '/item': (context) => ItemScreen(),
+      /*'/item': (context) => ItemScreen(),
+      '/itemGallery': (context) => ItemGallery(),
+      '/login': (context) => Login(),*/
     },
   )
   );
@@ -62,8 +68,10 @@ class _HomeState extends State<Home> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final PageController _pageController = PageController(initialPage: 0);
+  final FirebaseMessaging _fcm = new FirebaseMessaging();
   int currentPage = 0;
   bool logged = true;
+  StreamSubscription iosSubscription;
 
   _sendArg(BuildContext context) {
     showDialog(
@@ -89,6 +97,26 @@ class _HomeState extends State<Home> {
   void initState() {
     _check(context);
     super.initState();
+    if(Platform.isIOS) {
+      iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
+        _fcm.subscribeToTopic('registeredUsers');
+      });
+      _fcm.requestNotificationPermissions(IosNotificationSettings());
+    } else {
+      _fcm.subscribeToTopic('registeredUsers');
+    }
+
+    _fcm.configure(
+      onMessage: (Map<String, dynamic> message) {
+        print('onMessage called: $message');
+      },
+      onResume: (Map<String, dynamic> message) {
+        print('onResume called: $message');
+      },
+      onLaunch: (Map<String, dynamic> message) {
+        print('onLaunch called: $message');
+      },
+    );
   }
 
 
@@ -112,54 +140,17 @@ class _HomeState extends State<Home> {
         },
         children: <Widget>[
           HomePageScreen(),
-          (logged) ? MercatinoScreen() : Login(),
+          //(logged) ? MercatinoScreen() : Login(),
         ],
       ),
-      floatingActionButton: UnicornDialer(
-        hasBackground: false,
-        parentHeroTag: "ahbho",
-        childButtons: <UnicornButton>[
-          UnicornButton(
-            hasLabel: true,
-            labelText: "Cerca",
-            
-            currentButton: FloatingActionButton(
-              child: Icon(Icons.search),
-              heroTag: "search",
-              onPressed: () {},
-              mini: true,
-            ),
-          ),
-          UnicornButton(
-            hasLabel: true,
-            labelText: "Aggiungi al mercatino",
-            currentButton: FloatingActionButton(
-              child: Icon(Icons.add),
-              onPressed: () {},
-              heroTag: "aggmercato",
-              mini: true,
-            ),
-          ),
-          UnicornButton(
-            hasLabel: true,
-            labelText: "Invia un'argomento",
-            currentButton: FloatingActionButton(
-              child: Icon(Icons.add_comment),
-              onPressed: () {},
-              heroTag: "sendag",
-              mini: true,
-            ),
-          ),
-        ],
-        parentButton: Icon(Icons.more_vert)
-      ),
+      floatingActionButton: FloatingActionButton(onPressed: () => _sendArg(context), child: Icon(Icons.add_comment),),
       bottomNavigationBar: BottomNavigationBar(
         onTap: (i) {
-          //if(i == 1) _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("Coming Soon! 😉"),));
-          _pageController.animateToPage(i, duration: Duration(milliseconds: 500), curve: Curves.ease);
+          if(i == 1) _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("Coming Soon! 😉"),));
+          /*_pageController.animateToPage(i, duration: Duration(milliseconds: 500), curve: Curves.ease);
           setState(() {
             currentPage = i;
-          });
+          });*/
         },
         currentIndex: currentPage,
         items: <BottomNavigationBarItem>[
@@ -363,9 +354,9 @@ class __ArgState extends State<_Arg> {
       setState(() {
         argError = null;
       });
-      http.Response argResponce = await http.post("https://ggv.pangio.it/api/post/arg/index.php", body: {"text": text});
+      http.Response araResponse = await http.post("https://ggv.pangio.it/api/post/arg/index.php", body: {"text": text});
       Navigator.pop(c);
-      var response = jsonDecode(argResponce.body);
+      var response = jsonDecode(araResponse.body);
       if(response['error'] == true) {
         _showSnackBar(response['msg']);
       } else {

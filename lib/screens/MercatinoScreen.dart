@@ -24,7 +24,7 @@ class _MercatinoScreenState extends State<MercatinoScreen> with AutomaticKeepAli
             itemCount: data.length,
             itemBuilder: (context, i) {
               return InkWell(
-                onTap: () => Navigator.pushNamed(context, '/item', arguments: ItemScreenArgs(data[i].documentID, data[i]['name'], data[i]['price'].toString(), data[i]['imageUrl'], data[i]['author'])),
+                onTap: () => Navigator.pushNamed(context, '/item', arguments: ItemScreenArgs(uuid: data[i].documentID, name: data[i]['name'], price: data[i]['price'].toString(), imgsUrl: data[i]['imageUrl'], author: data[i]['author'], description: data[i]['description'])),
                 child: MercatinoItem(
                   name: data[i]['name'],
                   price: data[i]['price'].toString(),
