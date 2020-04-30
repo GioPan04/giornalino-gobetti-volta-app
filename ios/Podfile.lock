@@ -103,7 +103,6 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
-  - Firebase/Messaging
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
   - share (from `.symlinks/plugins/share/ios`)
@@ -180,6 +179,6 @@ SPEC CHECKSUMS:
   url_launcher_macos: fd7894421cd39320dce5f292fc99ea9270b2a313
   url_launcher_web: e5527357f037c87560776e36436bf2b0288b965c
 
-PODFILE CHECKSUM: 94c933a7250f100797892a615bfbf303339117af
+PODFILE CHECKSUM: 534dfbcfa375a341e6716ecc629e4c8285835213
 
 COCOAPODS: 1.8.4

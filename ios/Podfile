@@ -1,5 +1,7 @@
 # Uncomment this line to define a global platform for your project
 # platform :ios, '9.0'
+# add pods for desired Firebase products
+# https://firebase.google.com/docs/ios/setup#available-pods
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -88,5 +90,3 @@ post_install do |installer|
     end
   end
 end
-
-pod 'Firebase/Messaging'
