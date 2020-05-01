@@ -1,17 +1,21 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:giornalino_gv_app/screens/AboutScreen.dart';
 import 'package:giornalino_gv_app/screens/FirstScreen.dart';
+import 'screens/SputiScreen.dart';
+import 'screens/VideoScreen.dart';
 import 'screens/giornale.dart';
 import 'package:shimmer/shimmer.dart';
 import 'utils/copertina.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
-import 'screens/MercatinoScreen.dart';
+//import 'screens/MercatinoScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'screens/authenticate/AuthenticateScreen.dart';
-import 'package:unicorndial/unicorndial.dart';
-import 'screens/ItemScreen.dart';
+//import 'screens/authenticate/AuthenticateScreen.dart';
+//import 'screens/ItemScreen.dart';
+//import 'screens/authenticate/AuthenticateScreen.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -45,7 +49,6 @@ void main() {
       '/giornale': (context) => GiornaleScreen(),
       '/about': (context) => AboutScreen(),
       '/first': (context) => FirstScreen(),
-      '/item': (context) => ItemScreen(),
     },
   )
   );
@@ -61,9 +64,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  final PageController _pageController = PageController(initialPage: 0);
-  int currentPage = 0;
-  bool logged = true;
+  final PageController _pageController = PageController(initialPage: 1);
+  int currentPage = 1;
 
   _sendArg(BuildContext context) {
     showDialog(
@@ -72,10 +74,6 @@ class _HomeState extends State<Home> {
         return _Arg(scaffoldKey: _scaffoldKey,);
       }
     );
-  }
-
-  _sellOn(BuildContext context) {
-
   }
 
   _check(BuildContext context) async {
@@ -103,59 +101,22 @@ class _HomeState extends State<Home> {
           IconButton(icon: Icon(Icons.info_outline), onPressed: () => Navigator.of(context).pushNamed('/about')),
         ],
       ),
-      
       body: PageView(
+        controller: _pageController,
         onPageChanged: (i) {
           setState(() {
             currentPage = i;
           });
         },
         children: <Widget>[
+          VideoScreen(),
           HomePageScreen(),
-          (logged) ? MercatinoScreen() : Login(),
+          SputiScreen(),
         ],
       ),
-      floatingActionButton: UnicornDialer(
-        hasBackground: false,
-        parentHeroTag: "ahbho",
-        childButtons: <UnicornButton>[
-          UnicornButton(
-            hasLabel: true,
-            labelText: "Cerca",
-            
-            currentButton: FloatingActionButton(
-              child: Icon(Icons.search),
-              heroTag: "search",
-              onPressed: () {},
-              mini: true,
-            ),
-          ),
-          UnicornButton(
-            hasLabel: true,
-            labelText: "Aggiungi al mercatino",
-            currentButton: FloatingActionButton(
-              child: Icon(Icons.add),
-              onPressed: () {},
-              heroTag: "aggmercato",
-              mini: true,
-            ),
-          ),
-          UnicornButton(
-            hasLabel: true,
-            labelText: "Invia un'argomento",
-            currentButton: FloatingActionButton(
-              child: Icon(Icons.add_comment),
-              onPressed: () {},
-              heroTag: "sendag",
-              mini: true,
-            ),
-          ),
-        ],
-        parentButton: Icon(Icons.more_vert)
-      ),
+      floatingActionButton: FloatingActionButton(onPressed: () => _sendArg(context), child: Icon(Icons.add_comment),),
       bottomNavigationBar: BottomNavigationBar(
         onTap: (i) {
-          //if(i == 1) _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("Coming Soon! 😉"),));
           _pageController.animateToPage(i, duration: Duration(milliseconds: 500), curve: Curves.ease);
           setState(() {
             currentPage = i;
@@ -163,8 +124,9 @@ class _HomeState extends State<Home> {
         },
         currentIndex: currentPage,
         items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.video_library), title: Text("Video")),
           BottomNavigationBarItem(icon: Icon(Icons.library_books), title: Text("Edizioni")),
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), title: Text("Mercatino"))
+          BottomNavigationBarItem(icon: Icon(Icons.chat), title: Text("Sputi"))
         ]
       ),
     );
@@ -180,7 +142,6 @@ class HomePageScreen extends StatefulWidget {
 
 class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAliveClientMixin<HomePageScreen> {
 
-  bool dark;
   List<String> readed = [];
   Future data;
 
@@ -225,8 +186,8 @@ class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAlive
         return Padding(
           padding: EdgeInsets.all(5),
           child: Shimmer.fromColors(
-            highlightColor: (!dark) ? Colors.white : Color(0xFFC9C9C9), //Colore sfumatura (+ chiaro)
-            baseColor: (!dark) ? Colors.grey[300] : Color(0xFF636363), //Colore di sfondo
+            highlightColor: Color(0xFFC9C9C9), //Colore sfumatura (+ chiaro)
+            baseColor: Color(0xFF636363), //Colore di sfondo
             child: CopertinaLoading(),
           ),
         );
@@ -236,7 +197,6 @@ class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAlive
 
   @override
   Widget build(BuildContext context) {
-    dark = /*(MediaQuery.of(context).platformBrightness == Brightness.dark);*/ true;
     super.build(context);
     return FutureBuilder(
       future: data,
@@ -307,11 +267,8 @@ class __ArgState extends State<_Arg> {
   final TextEditingController argCtrl = TextEditingController();
   String argError;
 
-  bool dark;
-
   @override
   Widget build(BuildContext context) {
-    dark = /*(MediaQuery.of(context).platformBrightness == Brightness.dark);*/ true;
     return AlertDialog(
       title: Text("Segnalaci un'argomento"),
       content: SingleChildScrollView(
@@ -321,7 +278,7 @@ class __ArgState extends State<_Arg> {
           maxLines: null,
           minLines: null,
           maxLength: null,
-          style: new TextStyle(color: (dark) ? Colors.white: Colors.black),
+          style: new TextStyle(color: Colors.black),
           onChanged: (str) {
             if(str.isEmpty) {
               setState(() {
@@ -337,14 +294,14 @@ class __ArgState extends State<_Arg> {
           decoration: InputDecoration(
             hintText: "Scrivi un'argomento di cui parlare",
             errorText: argError,
-            hintStyle: TextStyle(color: (dark) ? Colors.white: Colors.black),
-            labelStyle: TextStyle(color: (dark) ? Colors.white: Colors.black),
-            border: OutlineInputBorder(borderSide: BorderSide(color: (dark) ? Colors.white: Colors.black)),
-            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: (dark) ? Colors.white: Colors.black)),
-            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: (dark) ? Colors.white: Colors.black)),
-            fillColor: (dark) ? Colors.white: Colors.black,
-            focusColor: (dark) ? Colors.white: Colors.black,
-            hoverColor: (dark) ? Colors.white: Colors.black,
+            hintStyle: TextStyle(color: Colors.black),
+            labelStyle: TextStyle(color: Colors.black),
+            border: OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+            fillColor: Colors.black,
+            focusColor: Colors.black,
+            hoverColor: Colors.black,
           ),
         ),
       ),
@@ -363,9 +320,9 @@ class __ArgState extends State<_Arg> {
       setState(() {
         argError = null;
       });
-      http.Response argResponce = await http.post("https://ggv.pangio.it/api/post/arg/index.php", body: {"text": text});
+      http.Response araResponse = await http.post("https://ggv.pangio.it/api/post/arg/index.php", body: {"text": text});
       Navigator.pop(c);
-      var response = jsonDecode(argResponce.body);
+      var response = jsonDecode(araResponse.body);
       if(response['error'] == true) {
         _showSnackBar(response['msg']);
       } else {
