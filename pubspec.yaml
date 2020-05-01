@@ -22,7 +22,6 @@ dependencies:
   animations: ^1.0.0+5
   share: ^0.6.3+6
   flare_flutter: ^2.0.1
-  firebase_messaging: ^6.0.13
 
 dev_dependencies:
   flutter_test:

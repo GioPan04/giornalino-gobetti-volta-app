@@ -5,7 +5,7 @@ import 'package:share/share.dart';
 class AboutScreen extends StatelessWidget {
 
   
-  final List<Widget> people = ["Lilian Danciger,Presidente", "Gioele Pannetto,Vice Presidente & App Developer,https://instagram.com/giopan.sh", "Daniele Loreto,Caporedattore,https://instagram.com/daniele.loreto", "Tommaso Piccardi,Caposervizi,https://www.instagram.com/tommys_poetry"].map((f) {
+  final List<Widget> people = ["Lilian Danciger,Direttrice", "Gioele Pannetto,Vice Direttore & App Developer,https://instagram.com/giopan.sh", "Daniele Loreto,Caporedattore,https://instagram.com/daniele.loreto"].map((f) {
     List<String> l = f.split(',');
     //return GestureDetector(child: Text("${l[0]} che fa ${l[1]}"), onTap: () => _launchURL(l[2]),);
     return ListTile(

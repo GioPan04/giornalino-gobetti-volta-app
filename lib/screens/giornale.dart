@@ -44,37 +44,6 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
     }
   }
 
-  Widget _charapterClicker() {
-    return Positioned(
-      top: 22,
-      right: -6,
-      child: SizedBox(
-        width: 60,
-        height: 60,
-        child: FlareActor('assets/Clicker.flr',
-          alignment: Alignment.center,
-          fit: BoxFit.contain,
-          animation: 'Main',
-          isPaused: false,
-        ),
-      ),
-    );
-  }
-
-  Widget _slider() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: FlareActor('assets/Scroll.flr',
-          alignment: Alignment.center,
-          fit: BoxFit.contain,
-          animation: 'Main',
-          isPaused: false,
-        ),
-    );
-  }
-
-
-  bool dark;
   showCharapters(BuildContext context) {
     showDialog(
       context: context,
@@ -104,19 +73,15 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
   @override
   Widget build(BuildContext context) {
     final GiornaleScreenArgs args = ModalRoute.of(context).settings.arguments;
-    dark = /*(MediaQuery.of(context).platformBrightness == Brightness.dark);*/ true;
-    return Stack(
-      children: <Widget>[
-        Scaffold(
+
+    return Scaffold(
           appBar: AppBar(
             title: Text(args.title),
             actions: <Widget>[
               IconButton(icon: Icon(Icons.book), tooltip: "Vai a capitolo", onPressed: () => showCharapters(context)),
             ],
           ),
-          body: Stack(
-            alignment: Alignment.center,
-            children: <Widget>[
+          body:
               FutureBuilder(
                 future: getJSONData(args.url),
                 builder: (context, snapshot) {
@@ -147,9 +112,9 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
                                           onTapLink: (url) => _launch(url),
                                           styleSheet: MarkdownStyleSheet(
                                             textAlign: WrapAlignment.spaceEvenly,
-                                            h1: TextStyle(fontFamily: "OpenSans-Bold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 25, height: 2),
-                                            h2: TextStyle(fontFamily: "OpenSans-SemiBold", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), fontSize: 23, height: 2),
-                                            p: TextStyle(fontFamily: "OpenSans-Regular", color: (!dark) ? Color.fromRGBO(0, 0, 0, 0.87) : Color.fromRGBO(255, 255, 255, 0.87), height: 1.15, fontSize: 16)
+                                            h1: TextStyle(fontFamily: "OpenSans-Bold", color: Color.fromRGBO(255, 255, 255, 0.87), fontSize: 25, height: 2),
+                                            h2: TextStyle(fontFamily: "OpenSans-SemiBold", color: Color.fromRGBO(255, 255, 255, 0.87), fontSize: 23, height: 2),
+                                            p: TextStyle(fontFamily: "OpenSans-Regular", color: Color.fromRGBO(255, 255, 255, 0.87), height: 1.15, fontSize: 16)
                                           ),
                                         ),
                                       ),
@@ -203,19 +168,6 @@ class _GiornaleScreenState extends State<GiornaleScreen> {
                   }
                 },
               ),
-              Column(
-                children: <Widget>[
-                  Container(color: Color(0xAA000000)),
-              _slider(),
-                ],
-              )
-              
-            ],
-          ),
-        ),
-        _charapterClicker(),
-        
-      ],
     );
   }
 }

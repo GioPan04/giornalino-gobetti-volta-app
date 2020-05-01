@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
-
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:giornalino_gv_app/screens/AboutScreen.dart';
 import 'package:giornalino_gv_app/screens/FirstScreen.dart';
+import 'screens/SputiScreen.dart';
+import 'screens/VideoScreen.dart';
 import 'screens/giornale.dart';
 import 'package:shimmer/shimmer.dart';
 import 'utils/copertina.dart';
@@ -49,9 +49,6 @@ void main() {
       '/giornale': (context) => GiornaleScreen(),
       '/about': (context) => AboutScreen(),
       '/first': (context) => FirstScreen(),
-      /*'/item': (context) => ItemScreen(),
-      '/itemGallery': (context) => ItemGallery(),
-      '/login': (context) => Login(),*/
     },
   )
   );
@@ -67,11 +64,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  final PageController _pageController = PageController(initialPage: 0);
-  final FirebaseMessaging _fcm = new FirebaseMessaging();
-  int currentPage = 0;
-  bool logged = true;
-  StreamSubscription iosSubscription;
+  final PageController _pageController = PageController(initialPage: 1);
+  int currentPage = 1;
 
   _sendArg(BuildContext context) {
     showDialog(
@@ -80,10 +74,6 @@ class _HomeState extends State<Home> {
         return _Arg(scaffoldKey: _scaffoldKey,);
       }
     );
-  }
-
-  _sellOn(BuildContext context) {
-
   }
 
   _check(BuildContext context) async {
@@ -97,26 +87,6 @@ class _HomeState extends State<Home> {
   void initState() {
     _check(context);
     super.initState();
-    if(Platform.isIOS) {
-      iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
-        _fcm.subscribeToTopic('registeredUsers');
-      });
-      _fcm.requestNotificationPermissions(IosNotificationSettings());
-    } else {
-      _fcm.subscribeToTopic('registeredUsers');
-    }
-
-    _fcm.configure(
-      onMessage: (Map<String, dynamic> message) {
-        print('onMessage called: $message');
-      },
-      onResume: (Map<String, dynamic> message) {
-        print('onResume called: $message');
-      },
-      onLaunch: (Map<String, dynamic> message) {
-        print('onLaunch called: $message');
-      },
-    );
   }
 
 
@@ -131,31 +101,32 @@ class _HomeState extends State<Home> {
           IconButton(icon: Icon(Icons.info_outline), onPressed: () => Navigator.of(context).pushNamed('/about')),
         ],
       ),
-      
       body: PageView(
+        controller: _pageController,
         onPageChanged: (i) {
           setState(() {
             currentPage = i;
           });
         },
         children: <Widget>[
+          VideoScreen(),
           HomePageScreen(),
-          //(logged) ? MercatinoScreen() : Login(),
+          SputiScreen(),
         ],
       ),
       floatingActionButton: FloatingActionButton(onPressed: () => _sendArg(context), child: Icon(Icons.add_comment),),
       bottomNavigationBar: BottomNavigationBar(
         onTap: (i) {
-          if(i == 1) _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("Coming Soon! 😉"),));
-          /*_pageController.animateToPage(i, duration: Duration(milliseconds: 500), curve: Curves.ease);
+          _pageController.animateToPage(i, duration: Duration(milliseconds: 500), curve: Curves.ease);
           setState(() {
             currentPage = i;
-          });*/
+          });
         },
         currentIndex: currentPage,
         items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.video_library), title: Text("Video")),
           BottomNavigationBarItem(icon: Icon(Icons.library_books), title: Text("Edizioni")),
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), title: Text("Mercatino"))
+          BottomNavigationBarItem(icon: Icon(Icons.chat), title: Text("Sputi"))
         ]
       ),
     );
@@ -171,7 +142,6 @@ class HomePageScreen extends StatefulWidget {
 
 class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAliveClientMixin<HomePageScreen> {
 
-  bool dark;
   List<String> readed = [];
   Future data;
 
@@ -216,8 +186,8 @@ class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAlive
         return Padding(
           padding: EdgeInsets.all(5),
           child: Shimmer.fromColors(
-            highlightColor: (!dark) ? Colors.white : Color(0xFFC9C9C9), //Colore sfumatura (+ chiaro)
-            baseColor: (!dark) ? Colors.grey[300] : Color(0xFF636363), //Colore di sfondo
+            highlightColor: Color(0xFFC9C9C9), //Colore sfumatura (+ chiaro)
+            baseColor: Color(0xFF636363), //Colore di sfondo
             child: CopertinaLoading(),
           ),
         );
@@ -227,7 +197,6 @@ class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAlive
 
   @override
   Widget build(BuildContext context) {
-    dark = /*(MediaQuery.of(context).platformBrightness == Brightness.dark);*/ true;
     super.build(context);
     return FutureBuilder(
       future: data,
@@ -298,11 +267,8 @@ class __ArgState extends State<_Arg> {
   final TextEditingController argCtrl = TextEditingController();
   String argError;
 
-  bool dark;
-
   @override
   Widget build(BuildContext context) {
-    dark = /*(MediaQuery.of(context).platformBrightness == Brightness.dark);*/ true;
     return AlertDialog(
       title: Text("Segnalaci un'argomento"),
       content: SingleChildScrollView(
@@ -312,7 +278,7 @@ class __ArgState extends State<_Arg> {
           maxLines: null,
           minLines: null,
           maxLength: null,
-          style: new TextStyle(color: (dark) ? Colors.white: Colors.black),
+          style: new TextStyle(color: Colors.black),
           onChanged: (str) {
             if(str.isEmpty) {
               setState(() {
@@ -328,14 +294,14 @@ class __ArgState extends State<_Arg> {
           decoration: InputDecoration(
             hintText: "Scrivi un'argomento di cui parlare",
             errorText: argError,
-            hintStyle: TextStyle(color: (dark) ? Colors.white: Colors.black),
-            labelStyle: TextStyle(color: (dark) ? Colors.white: Colors.black),
-            border: OutlineInputBorder(borderSide: BorderSide(color: (dark) ? Colors.white: Colors.black)),
-            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: (dark) ? Colors.white: Colors.black)),
-            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: (dark) ? Colors.white: Colors.black)),
-            fillColor: (dark) ? Colors.white: Colors.black,
-            focusColor: (dark) ? Colors.white: Colors.black,
-            hoverColor: (dark) ? Colors.white: Colors.black,
+            hintStyle: TextStyle(color: Colors.black),
+            labelStyle: TextStyle(color: Colors.black),
+            border: OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+            fillColor: Colors.black,
+            focusColor: Colors.black,
+            hoverColor: Colors.black,
           ),
         ),
       ),
