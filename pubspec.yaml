@@ -8,21 +8,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  shimmer: ^1.0.1
   http: ^0.12.0+4
   flutter_markdown:
     git:
       url: https://github.com/GioPan04/flutter_markdown.git
       ref: alignment
   url_launcher: ^5.4.1
-  cupertino_icons: ^0.1.2
-  intl: ^0.16.1
-  animator: ^1.0.0+5
-  shared_preferences: ^0.5.6+2
-  animations: ^1.0.0+5
-  share: ^0.6.3+6
-  flare_flutter: ^2.0.1
-  video_player: ^0.10.11+1
+  provider: ^4.1.3
 
 dev_dependencies:
   flutter_test:
