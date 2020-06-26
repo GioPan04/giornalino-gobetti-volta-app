@@ -45,11 +45,12 @@ class _HomeState extends State<Home> {
             separatorBuilder: (context, i) => SizedBox(height: 5,),
             itemBuilder: (context, i) => OpenContainer(
               closedBuilder: (context, _) => EditionThumbnail(data.editions[i], ),
-              openBuilder: (context, _) => EditionScreen(),
+              openBuilder: (context, _) => EditionScreen(data.editions[i]),
               closedColor: Colors.grey[850],
               openColor: Colors.grey[850],
               transitionType: ContainerTransitionType.fade,
               closedElevation: 0,
+              openElevation: 5,
             ),
             itemCount: data.editions.length,
           );

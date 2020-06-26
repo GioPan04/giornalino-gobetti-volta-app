@@ -44,8 +44,8 @@ class EditionThumbnail extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 _buildTitle(context),
-                Text(data.author, style: TextStyle(color: Colors.white54),),
-                Text(data.timestamp, style: TextStyle(color: Colors.white54),),
+                Text("Autore: ${data.author}", style: TextStyle(color: Colors.white54),),
+                Text("Pubblicato il: ${data.timestamp}", style: TextStyle(color: Colors.white54),),
               ],
             ),
           ),

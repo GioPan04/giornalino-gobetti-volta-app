@@ -1,5 +1,6 @@
 //Import Flutter & Dart stuff 
 import 'package:flutter/material.dart';
+import 'package:giornalino_gv_app/providers/EditionProvider.dart';
 import 'package:giornalino_gv_app/providers/LastEditionsProvider.dart';
 
 //Import screens
@@ -20,6 +21,7 @@ class MateApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<LastEditionsProvider>(create: (_) => LastEditionsProvider()),
+        ChangeNotifierProvider<EditionProvider>(create: (_) => EditionProvider()),
       ],
       child: MaterialApp(
         initialRoute: '/',
