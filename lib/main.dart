@@ -1,30 +1,24 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:giornalino_gv_app/screens/AboutScreen.dart';
 import 'package:giornalino_gv_app/screens/FirstScreen.dart';
+import 'package:giornalino_gv_app/screens/VideoScreen.dart';
 import 'screens/SputiScreen.dart';
-import 'screens/VideoScreen.dart';
+import 'screens/VideosScreen.dart';
 import 'screens/giornale.dart';
 import 'package:shimmer/shimmer.dart';
 import 'utils/copertina.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
-//import 'screens/MercatinoScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-//import 'screens/authenticate/AuthenticateScreen.dart';
-//import 'screens/ItemScreen.dart';
-//import 'screens/authenticate/AuthenticateScreen.dart';
 
 void main() {
   runApp(MaterialApp(
     initialRoute: '/',
+    title: 'GV Reporter',
     themeMode: ThemeMode.dark,
     debugShowCheckedModeBanner: false,
-    theme: ThemeData(
-      
-    ),
     darkTheme: ThemeData(
       primaryColor: Color(0xFF000000),
       scaffoldBackgroundColor: Color(0xFF222222),
@@ -37,15 +31,16 @@ void main() {
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: Color(0xFF000000),
+        foregroundColor: Color(0xFFFFFFFF)
       ),
-      accentIconTheme: IconThemeData(color: Color(0xFFFFFFFF)),
       primaryIconTheme: IconThemeData(color: Color(0xFFFFFFFF)),
       brightness: Brightness.dark,
       iconTheme: IconThemeData(color: Color(0xFFFFFFFF)),
-      textTheme: TextTheme(body1: TextStyle(color: Color(0xFFFFFFFF)), button: TextStyle(color: Color(0xFFFFFFFF)), subtitle: TextStyle(color: Color(0xFFFFFFFF)), title: TextStyle(color: Color(0xFFFFFFFF)), subhead: TextStyle(color: Color(0xFFFFFFFF)), caption: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.7))),
+      textTheme: TextTheme(bodyText2: TextStyle(color: Color(0xFFFFFFFF)), button: TextStyle(color: Color(0xFFFFFFFF)), subtitle2: TextStyle(color: Color(0xFFFFFFFF)), headline6: TextStyle(color: Color(0xFFFFFFFF)), subtitle1: TextStyle(color: Color(0xFFFFFFFF)), caption: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.7))),
     ),
     routes: {
       '/': (context) => Home(),
+      '/video': (context) => VideoScreen(),
       '/giornale': (context) => GiornaleScreen(),
       '/about': (context) => AboutScreen(),
       '/first': (context) => FirstScreen(),
@@ -109,12 +104,12 @@ class _HomeState extends State<Home> {
           });
         },
         children: <Widget>[
-          VideoScreen(),
+          VideosScreen(),
           HomePageScreen(),
           SputiScreen(),
         ],
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _sendArg(context), child: Icon(Icons.add_comment),),
+      floatingActionButton: (currentPage == 2) ? FloatingActionButton(onPressed: () => _sendArg(context), child: Icon(Icons.add_comment),) : null,
       bottomNavigationBar: BottomNavigationBar(
         onTap: (i) {
           _pageController.animateToPage(i, duration: Duration(milliseconds: 500), curve: Curves.ease);
@@ -172,9 +167,9 @@ class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAlive
   }
 
   Future getData() async {
-    http.Response response = await http.get("https://ggv.pangio.it/api/get");
+    http.Response response = await http.get("http://igioele.pangio.lan:3000/api/articles");
     var result = jsonDecode(response.body);
-    return result["items"];
+    return result["data"];
   }
 
   _buildShimmer() {
@@ -209,7 +204,7 @@ class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAlive
               return InkWell(
                 child: Padding(
                   padding: EdgeInsets.all(5),
-                  child: Copertina(title: data[i]['title'], imageUrl: data[i]['thumnail_url'], autore: data[i]['author'], date: date(data[i]['date']), read: !readed.contains(data[i]['id'].toString()),),
+                  child: Copertina(title: data[i]['title'], imageUrl: data[i]['thumnail_url'], autore: data[i]['author'], date: date(data[i]['date']), read: !readed.contains(data[i]['id'].toString())),
                 ),
                 onTap: () {
                   if(!readed.contains(data[i]['id'].toString())) {
@@ -218,7 +213,7 @@ class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAlive
                     });
                     _addRead();
                   }
-                  Navigator.pushNamed(context, '/giornale', arguments: GiornaleScreenArgs(url: data[i]['article_url'], title: data[i]['title']));
+                  Navigator.pushNamed(context, '/giornale', arguments: GiornaleScreenArgs(id: data[i]['id'], title: data[i]['title']));
 
                 } 
               );
@@ -270,7 +265,7 @@ class __ArgState extends State<_Arg> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Segnalaci un'argomento"),
+      title: Text("Mandaci uno sputo"),
       content: SingleChildScrollView(
         child: TextField(
           keyboardType: TextInputType.text,
@@ -278,7 +273,7 @@ class __ArgState extends State<_Arg> {
           maxLines: null,
           minLines: null,
           maxLength: null,
-          style: new TextStyle(color: Colors.black),
+          style: new TextStyle(color: Colors.white),
           onChanged: (str) {
             if(str.isEmpty) {
               setState(() {
@@ -292,16 +287,16 @@ class __ArgState extends State<_Arg> {
           },
           onSubmitted: (str) => _sendArg(context, str),
           decoration: InputDecoration(
-            hintText: "Scrivi un'argomento di cui parlare",
+            hintText: "Scrivi qui il tuo sputo",
             errorText: argError,
-            hintStyle: TextStyle(color: Colors.black),
-            labelStyle: TextStyle(color: Colors.black),
-            border: OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-            fillColor: Colors.black,
-            focusColor: Colors.black,
-            hoverColor: Colors.black,
+            hintStyle: TextStyle(color: Colors.white),
+            labelStyle: TextStyle(color: Colors.white),
+            border: OutlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+            fillColor: Colors.white,
+            focusColor: Colors.white,
+            hoverColor: Colors.white,
           ),
         ),
       ),
@@ -320,13 +315,13 @@ class __ArgState extends State<_Arg> {
       setState(() {
         argError = null;
       });
-      http.Response araResponse = await http.post("https://ggv.pangio.it/api/post/arg/index.php", body: {"text": text});
+      http.Response araResponse = await http.post("http://igioele.pangio.lan:3000/api/sputo", body: {"text": text});
       Navigator.pop(c);
       var response = jsonDecode(araResponse.body);
-      if(response['error'] == true) {
-        _showSnackBar(response['msg']);
+      if(response['posted'] != true) {
+        _showSnackBar(response['error']);
       } else {
-        _showSnackBar("Argomento inviato correttamente 👍");
+        _showSnackBar("Sputo inviato correttamente 👍");
       }
     }
   }

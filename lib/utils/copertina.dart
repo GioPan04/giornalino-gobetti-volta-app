@@ -7,7 +7,7 @@ class Copertina extends StatelessWidget {
   final String imageUrl;
   final String date;
   final bool read;
-  bool dark;
+  //final Map tags;
   Copertina({@required this.title, @required this.autore, @required this.imageUrl, @required this.date, this.read});
 
   @override
@@ -39,15 +39,15 @@ class Copertina extends StatelessWidget {
               Text(title, style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.87) , fontSize: 21, fontFamily: "OpenSans-Bold", height: 1),),
               SizedBox(height: 5,),
               Text("Autore: $autore", style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.6), fontFamily: "OpenSans-Light", height: 1.2),),
-              Wrap(
+              /*(tags != null) ? Wrap(
                 direction: Axis.horizontal,
                 children: <Widget>[
                   Text("Tags:", style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.6), fontFamily: "OpenSans-Light", height: 1.2),),
                   Text("#satira", style: TextStyle(color: Color.fromRGBO(244, 67, 54, 0.4), fontFamily: "OpenSans-SemiBold", height: 1.2),)
                 ],
-              ),
+              ) : null,*/
               Text("Pubblicato il: $date", style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.6), fontFamily: "OpenSans-Light", height: 1.2),),
-            ],
+            ]//.where((element) => element != null).toList(),
           ),
         ),
         (read) ? Icon(Icons.new_releases) : Container(),
