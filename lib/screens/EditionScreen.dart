@@ -35,7 +35,17 @@ class _EditionScreenState extends State<EditionScreen> {
       body: Consumer<EditionProvider>(
         builder: (context, data, _) {
           if(data.failure != null) return Center(child: Text(data.failure.toString()),);
-          if(data.text != null) return SingleChildScrollView(child: MarkdownBody(data: Utf8Decoder(allowMalformed: true).convert(data.text.codeUnits), styleSheet: MarkdownStyleSheet(p: TextStyle(color: Colors.black))));
+          if(data.text != null) return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: MarkdownBody(
+                data: Utf8Decoder(allowMalformed: true).convert(data.text.codeUnits),
+                styleSheet: MarkdownStyleSheet(
+                  textAlign: WrapAlignment.spaceAround,
+                ),
+              ),
+            )
+          );
           return Center(child: CircularProgressIndicator(),);
         },
       ),
