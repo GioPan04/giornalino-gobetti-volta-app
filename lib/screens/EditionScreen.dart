@@ -22,7 +22,7 @@ class _EditionScreenState extends State<EditionScreen> {
   void initState() { 
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      Provider.of<EditionProvider>(context, listen: false).getData(widget.data.articleUrl);
+      Provider.of<EditionProvider>(context, listen: false).getData(widget.data.id);
     });
   }
 

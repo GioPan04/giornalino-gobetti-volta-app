@@ -1,9 +1,10 @@
 import 'package:intl/intl.dart';
 
 class Edition {
-  final String title, author, thumbnailUrl, articleUrl, timestamp;
+  final String title, author, thumbnailUrl, timestamp;
+  final int id;
 
-  Edition({this.title, this.author, this.articleUrl, this.thumbnailUrl, this.timestamp});
+  Edition({this.title, this.author, this.id, this.thumbnailUrl, this.timestamp});
 
   factory Edition.fromJSON(Map<String,dynamic> data) {
 
@@ -17,7 +18,7 @@ class Edition {
       title: data['title'] as String,
       author: data['author'] as String,
       thumbnailUrl: data['thumnail_url'] as String,
-      articleUrl: data['article_url'] as String,
+      id: data['id'] as int,
       timestamp: date(data['date']),
     );
   }

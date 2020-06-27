@@ -27,14 +27,14 @@ class Api {
     return compute(parseEditions, response, debugLabel: 'Parsing editions page $page');
   }
 
-  Future<String> getEdition(String url) async {
-    return await get('https://ggv.pangio.it/data/1588688430/index.md', ignoreUrl: true);
+  Future<String> getEdition(int id) async {
+    return await get('/articles/$id');
   }
 
-  Future<String> get(String path, {Map<String,String> queryParams, bool ignoreUrl = false}) async {
+  Future<String> get(String path, {Map<String,String> queryParams}) async {
     Uri url = Uri.https(host, apiEndPoint + path, queryParams);
     try {
-      http.Response response = await http.get(ignoreUrl ? path : url);
+      http.Response response = await http.get(url);
       if(response.statusCode >= 400 && response.statusCode <= 499) throw Failure("Il contenuto che stai cercando non è stato trova o momentaneamente non disponible.\nRiprova più tardi");
       if(response.statusCode >= 500 && response.statusCode <= 599) throw Failure("Il server non è stato in grado di completare la richiesta.\nRiprova più tardi");
       return response.body;

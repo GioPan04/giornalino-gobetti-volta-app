@@ -9,12 +9,12 @@ class EditionProvider with ChangeNotifier {
   Failure _failure;
   Failure get failure => _failure;
 
-  Future<void> getData(String url) async {
+  Future<void> getData(int id) async {
     _failure = null;
     _text = null;
     notifyListeners();
     try {
-      String _response = await Api().getEdition(url);
+      String _response = await Api().getEdition(id);
       _text = _response ?? "";
     } on Failure catch(e) {
       _failure = e;
